@@ -1,71 +1,42 @@
 import requests
-from geopy.geocoders import Nominatim # module to convert an address into latitude and longitude values
+from geopy.geocoders import Nominatim  # модуль конвертации адреса в долготу и широту
 
-CLIENT_ID = 'GO4ILQMV0FPGDVJEAQ0HBUN0AJNDRBIYDK1FE5WP2EH4AOCR'
-CLIENT_SECRET = 'DVAHS50CDEHDSGPSNPPMTE1NH0FZMI3WHDB13ZUIB1YX3UAC'
 url = "https://api.foursquare.com/v3/places/search"
 
-address = '89 E 42nd St, New York, NY 10017'
+address = 'Москва, Красная площадь'
+search_query = 'museum'
 
-geolocator = Nominatim(user_agent="foursquare_agent")
-location = geolocator.geocode(address)
-latitude = location.latitude
-longitude = location.longitude
-LIMIT = 2
+LIMIT = 10
 radius = 1000
-search_query = 'Pizza'
 
 headers = {
     "Accept": "application/json",
     "Authorization": "fsq3KHqn/0O9Yppp0vwz/B99aVtbL6ZbH98ehhpKqzrEua8=",
 }
 
-
 if __name__ == '__main__':
-    url = f'https://api.foursquare.com/v3/places/search?ll=40.7,-74&query=sushi&limit=2'
-    response = requests.request("GET", url, headers=headers)
-    print(response.text)
+    geolocator = Nominatim(user_agent="foursquare_agent")
+    location = geolocator.geocode(address)
+    if location:
+        latitude = location.latitude
+        longitude = location.longitude
 
-#Client Id = GO4ILQMV0FPGDVJEAQ0HBUN0AJNDRBIYDK1FE5WP2EH4AOCR
-#Client Secret = DVAHS50CDEHDSGPSNPPMTE1NH0FZMI3WHDB13ZUIB1YX3UAC
-#Token = fsq3KHqn/0O9Yppp0vwz/B99aVtbL6ZbH98ehhpKqzrEua8=
-#https://www.kaggle.com/code/kristoft/tutorial-foursquare-api-search
-# import requests
-#
-# # Замените YOUR_CLIENT_ID и YOUR_CLIENT_SECRET на ваши реальные ключи Foursquare
-# CLIENT_ID = 'GO4ILQMV0FPGDVJEAQ0HBUN0AJNDRBIYDK1FE5WP2EH4AOCR'
-# CLIENT_SECRET = 'DVAHS50CDEHDSGPSNPPMTE1NH0FZMI3WHDB13ZUIB1YX3UAC'
-# VERSION = '20231220'  # Версия API
-#
-# # Координаты (например, центр города)
-# latitude = 40.7128
-# longitude = -74.0060
-#
-# # Параметры запроса
-# params = {
-#     'client_id': CLIENT_ID,
-#     'client_secret': CLIENT_SECRET,
-#     'v': VERSION,
-#     'll': f'{latitude},{longitude}',
-#     'query': 'музей',
-#     'intent': 'browse',
-#     'radius': 1000,  # Радиус поиска в метрах
-#     'limit': 10  # Ограничение на количество результатов
-# }
-#
-# # URL для запроса
-# url = 'https://api.foursquare.com/v3/venues/search'
-#
-# # Выполнение запроса
-# response = requests.get(url, params=params)
-# data = response.json()
-#
-# print(data)
-# # Вывод результатов
-# for venue in data['response']['venues']:
-#     print(f"Название: {venue['name']}")
-#     print(f"Адрес: {venue['location']['address']}")
-#     print("-" * 30)
-
-
-#RESTClient https://api.foursquare.com/v3/places/search?ll=40.7,-74&query=музей&limit=1
+        params = {
+            "ll": f"{latitude},{longitude}",
+            "query": search_query,
+            "limit": LIMIT,
+            "sort": "DISTANCE",
+            "radius": radius,
+            "fields": "name,location,rating"
+        }
+        response = requests.request("GET", url, params=params, headers=headers)
+        if response.status_code == 200:
+            data = response.json()
+            for row in data['results']:
+                print(f"{row.get('name', 'Nan')}; "
+                      f"{row.get('location', 'Nan').get('address', 'Nan')}; "
+                      f"{row.get('rating', 'Nan')}")
+        else:
+            print(f'Error {response.status_code}')
+    else:
+        print('Location not found!')
