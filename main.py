@@ -2,9 +2,7 @@ import requests
 from geopy.geocoders import Nominatim  # модуль конвертации адреса в долготу и широту
 
 url = "https://api.foursquare.com/v3/places/search"
-
 address = 'Москва, Красная площадь'
-
 LIMIT = 10     # Лимит по количеству объектов запроса
 radius = 1000  # Радиус поиска объектов от центральной точки (в метрах)
 
@@ -22,7 +20,6 @@ if __name__ == '__main__':
 
         print('Введите "/exit" для выхода')
         while True:
-
             search_query = input('Введите заведение: ')
             if search_query == '/exit':
                 break
